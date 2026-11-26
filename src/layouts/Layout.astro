@@ -1,0 +1,238 @@
+---
+// src/layouts/Layout.astro
+import "../styles/global.css";
+import { nombreCompleto, promocion } from "../utils/evento";
+import BotonMusica from "../components/BotonMusica.astro";
+
+export interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+
+/*
+   ── La vista previa al compartir el link ──────────────────────
+   La imagen va en 1200x630, que es la franja que usa WhatsApp, con la
+   miniatura entera adentro y los costados rellenos. Es
+   /imagenes/miniatura-whatsapp.jpg: fondo perla, flores arriba a la
+   derecha y rosas (separador) abajo a la izquierda, y al
+   centro "Invitación a mi graduación", el nombre y la carrera (lo
+   importante va al medio porque en el chat WhatsApp a veces muestra solo
+   un cuadrado central). Si cambia el nombre, hay que rehacerla.
+
+   La ruta se arma con Astro.site (la dirección del config): WhatsApp no
+   sigue rutas relativas, necesita la dirección completa.
+
+   El título de la vista previa es un carácter en blanco (U+2800) para que
+   la tarjeta quede con la imagen sola. La pestaña sigue con su título.
+*/
+const miniatura = new URL('/imagenes/miniatura-whatsapp.jpg', Astro.site).href;
+const paginaActual = new URL(Astro.url.pathname, Astro.site).href;
+const tituloPreview = '⠀';
+const textoImagen = `${nombreCompleto}, Promoción ${promocion}`;
+---
+
+<!doctype html>
+<html lang="es" class="m-0 p-0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="only light" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+
+    <!-- ── Vista previa al compartir el link ─────────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={tituloPreview} />
+    <meta property="og:url" content={paginaActual} />
+    <meta property="og:image" content={miniatura} />
+    <meta property="og:image:secure_url" content={miniatura} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={textoImagen} />
+    <meta property="og:locale" content="es_ES" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloPreview} />
+    <meta name="twitter:image" content={miniatura} />
+
+    <!-- La letra del nombre viene del propio sitio y se pide primero -->
+    <link rel="preload" href="/fonts/alex-brush-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/great-vibes-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- La primera hoja: que el fondo perla llegue cuanto antes -->
+    <link rel="preload" href="/imagenes/fondoperla.webp" as="image" type="image/webp" />
+
+    <!-- Un solo pedido a Google para el resto de las letras -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Modo claro siempre: `only light`, en ese orden */
+      html {
+        width: 100%;
+        overflow-x: hidden;
+        color-scheme: only light;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        display: none;
+      }
+
+      body {
+        width: 100%;
+        min-height: 100vh;
+        overflow-x: hidden;
+        color-scheme: only light;
+        /* Fuera de la columna (tablet / PC): vino profundo, como imagen
+           y no como color, por el modo oscuro forzado */
+        background-image: linear-gradient(#2c060b, #2c060b);
+      }
+
+      /* La invitación SIEMPRE se ve como celular: columna centrada */
+      main {
+        position: relative;
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        min-height: 100vh;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.35);
+        overflow-x: hidden;
+        isolation: isolate;
+      }
+
+      /*
+         ── El marco quieto ──────────────────────────────────────
+         Tres capas fijas del ancho de la columna:
+         - el fondo perla, detrás de todo (estirado al 100% para que el
+           marco labrado se vea entero en cualquier alto de pantalla). Va
+           como imagen con un degradado perla debajo: el modo oscuro
+           forzado oscurece colores pero respeta las imágenes;
+         - las secciones, que se deslizan por el medio;
+         - las flores con el moño arriba y el listón abajo, por encima:
+           el texto pasa por debajo de ellos al hacer scroll.
+      */
+      .capa-fija {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 100%;
+        max-width: 430px;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+
+      .fondo {
+        z-index: -1;
+        background-image:
+          url("/imagenes/fondoperla.webp"),
+          linear-gradient(#f3e6d8, #f3e6d8);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+      }
+
+      /*
+         ── La ventana del panel ─────────────────────────────────
+         Las secciones se desplazan SOLO dentro del panel liso del medio
+         del fondo: la capa es fija y tiene su propio scroll, y se recorta
+         a la forma del panel. Los costados se cortan con clip-path; arriba
+         y abajo el texto se desvanece suave al llegar al borde del panel,
+         así el marco labrado, las flores y el listón quedan siempre limpios.
+         Como el fondo va estirado al 100%, el panel ocupa siempre los
+         mismos porcentajes de la pantalla y el recorte le calza.
+      */
+      .contenido-invitacion {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 100%;
+        max-width: 430px;
+        transform: translateX(-50%);
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        clip-path: inset(0 12.5% 0 12.5%);
+        -webkit-mask-image: linear-gradient(transparent 14.5%, #000 19%, #000 81%, transparent 85.5%);
+        mask-image: linear-gradient(transparent 14.5%, #000 19%, #000 81%, transparent 85.5%);
+      }
+
+      .contenido-invitacion::-webkit-scrollbar {
+        display: none;
+      }
+
+      .adornos {
+        z-index: 2;
+        overflow: hidden;
+      }
+
+      /* Chicas, para que queden sobre el marco y no sobre el panel */
+      .flores {
+        position: absolute;
+        top: -1.5%;
+        right: -5%;
+        width: 60%;
+        height: auto;
+        filter: drop-shadow(0 6px 10px rgba(58, 7, 13, 0.2));
+      }
+
+      .liston {
+        position: absolute;
+        bottom: -1.5%;
+        left: -7%;
+        width: 82%;
+        height: auto;
+        filter: drop-shadow(0 -2px 10px rgba(58, 7, 13, 0.2));
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="capa-fija fondo" aria-hidden="true"></div>
+
+      <div class="contenido-invitacion">
+        <slot />
+      </div>
+
+      <!-- La portada (si la página manda una): tapa la invitación hasta
+           que se toca el sobre. Va fuera de la ventana del panel y debajo
+           de las flores y el listón -->
+      <slot name="portada" />
+
+      <div class="capa-fija adornos" aria-hidden="true">
+        <img class="flores" src="/imagenes/flores-y-liston.webp" alt="" width="778" height="419" fetchpriority="high" />
+        <img class="liston" src="/imagenes/liston.webp" alt="" width="860" height="319" fetchpriority="high" />
+      </div>
+
+      <!-- Fuera de la ventana del panel: si no, el recorte lo escondería -->
+      <BotonMusica />
+    </main>
+
+    <script>
+      import { gsap } from "gsap";
+
+      // Al abrir: las flores bajan y el listón entra de costado
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        gsap.from(".adornos .flores", { y: -50, opacity: 0, duration: 1.6, ease: "power3.out" });
+        gsap.from(".adornos .liston", { x: -90, opacity: 0, duration: 1.6, delay: 0.3, ease: "power3.out" });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+/*
+   Tipografías:
+   - Great Vibes: títulos. Alex Brush: el nombre de la graduada.
+     Las dos se sirven desde /fonts/ del propio sitio
+     (no desde Google) para que el nombre no tarde en aparecer.
+   - Playfair Display: palabras grandes en mayúscula, fecha y horas.
+   - Montserrat: textos corridos.
+   Playfair y Montserrat van en un solo pedido a Google, en Layout.astro.
+*/
+@font-face {
+    font-family: "Great Vibes";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/great-vibes-latin.woff2") format("woff2");
+}
+
+/* Alex Brush: solo el nombre de la graduada (encabezado y firma) */
+@font-face {
+    font-family: "Alex Brush";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/alex-brush-latin.woff2") format("woff2");
+}
+
+/* Paleta: vino sobre perla, como el diseño de referencia */
+:root {
+    --vino: #5b0f18;
+    --vino-oscuro: #3a070d;
+    --rojo: #8e1622;
+    --rosa: #a8636a;
+    --perla: #fbf4ec;
+    --dorado: #a47a2c; /* liso; más claro no se lee sobre el perla */
+}
+
+/*
+   ── La hoja ─────────────────────────────────────────────────
+   Las secciones son transparentes: el fondo perla, las flores de arriba
+   y el listón de abajo están fijos en el Layout y las secciones se
+   deslizan dentro del panel liso (ver Layout). Cada una ocupa solo lo que
+   necesita, con poco aire entre una y otra. La primera (encabezado)
+   arranca debajo del borde de arriba del panel y la última deja lugar para subir entera al centro: ver
+   .hoja:first-of-type y .hoja:last-of-type. El relleno de los costados
+   mantiene el texto dentro del panel liso del fondo.
+*/
+.hoja {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4.5svh 15%;
+    text-align: center;
+    color: var(--vino);
+    overflow: hidden;
+}
+
+/* La primera arranca en la zona sin desvanecer; la siguiente va pegada */
+.hoja:first-of-type {
+    padding-top: 19svh;
+}
+
+/*
+   La última tiene que poder subir hasta el centro del panel, lejos del
+   desvanecido de abajo (last-of-type y no last-child: Astro deja un
+   <script> después de cada sección, y ese sería el último hijo). Va en svh (el alto más chico, con las barras del
+   navegador visibles) y con margen: cuando las barras se esconden la
+   pantalla crece y la zona desvanecida también.
+*/
+.hoja:last-of-type {
+    padding-bottom: 27svh;
+}
+
+/* Títulos de sección: Great Vibes, sin mayúsculas ni espaciado */
+.titulo-seccion {
+    margin: 0;
+    font-family: "Great Vibes", cursive;
+    font-weight: 400;
+    font-size: clamp(2.5rem, 12vw, 3.3rem);
+    line-height: 1.1;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--vino);
+    /* Las colitas de la cursiva se pasan un poco del borde */
+    padding: 0.1em 0.3em;
+}
+
+/* Rótulo chico en mayúscula, encima o debajo de un título */
+.rotulo {
+    margin: 0;
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(0.8rem, 3.7vw, 0.95rem);
+    text-transform: uppercase;
+    letter-spacing: 0.17em;
+    color: var(--rojo);
+}
+
+.texto {
+    margin: 0;
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-weight: 400;
+    font-size: clamp(0.9rem, 3.9vw, 1rem);
+    line-height: 1.75;
+    color: var(--vino-oscuro);
+}
+
+/* Filete vino con un rombo al medio */
+.divisor-vino {
+    position: relative;
+    display: block;
+    width: min(60%, 190px);
+    height: 1px;
+    margin: 1.6svh auto;
+    background-image: linear-gradient(90deg, rgba(91, 15, 24, 0), rgba(91, 15, 24, 0.7) 50%, rgba(91, 15, 24, 0));
+}
+
+.divisor-vino::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background-image: linear-gradient(135deg, #b52a37, var(--vino));
+}
+
+/* Botón vino, como degradado (imagen) por el modo oscuro forzado */
+.boton-vino {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55em;
+    padding: 0.85em 1.8em;
+    border: 0;
+    border-radius: 999px;
+    background-image: linear-gradient(135deg, #8e1622, #4a0b12);
+    color: #fff7f0;
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(0.78rem, 3.4vw, 0.9rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(91, 15, 24, 0.28);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.boton-vino:active {
+    transform: scale(0.97);
+}
+
+

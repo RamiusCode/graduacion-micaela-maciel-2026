@@ -1,0 +1,204 @@
+---
+// src/components/BotonMusica.astro
+// Botón flotante abajo a la derecha para pausar y reanudar la melodía.
+// La melodía la crea este componente (window.audioGlobal). Con portada,
+// suena y aparece el botón al tocar el sobre; sin portada, suena con el
+// primer toque en la pantalla: los navegadores no dejan sonar nada antes
+// de que la persona toque algo.
+---
+
+<button
+    id="boton-musica"
+    type="button"
+    aria-label="Pausar o reanudar la música"
+    class="boton-musica"
+>
+    <!--
+       El icono anuncia lo que pasa al tocarlo, no el estado actual:
+       la nota limpia significa "está en pausa, tocá para reanudar".
+    -->
+    <svg
+        id="icono-nota"
+        class="nota oculto"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+    >
+        <path d="M9 18V6.5l10-2v11"></path>
+        <circle cx="6.5" cy="18" r="2.5"></circle>
+        <circle cx="16.5" cy="15.5" r="2.5"></circle>
+    </svg>
+
+    <!-- Nota tachada: está sonando, tocá para silenciar. -->
+    <svg
+        id="icono-nota-tachada"
+        class="nota"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+    >
+        <path d="M9 18V6.5l10-2v11"></path>
+        <circle cx="6.5" cy="18" r="2.5"></circle>
+        <circle cx="16.5" cy="15.5" r="2.5"></circle>
+        <path d="M3 3l18 18"></path>
+    </svg>
+</button>
+
+<style>
+    /*
+       Vino con trazo blanco: el filete y la nota van en blanco.
+
+       El vino va escrito como degradado de un solo color y no como
+       background-color a propósito: el modo oscuro forzado de algunos
+       celulares recalcula los colores pero respeta las imágenes, y un
+       degradado cuenta como imagen. Así el botón se ve igual en todos.
+    */
+    .boton-musica {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        /*
+           Por encima de todo, también de las flores y el listón: la melodía
+           tiene que poder cortarse siempre.
+        */
+        z-index: 9000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        padding: 0;
+        border-radius: 50%;
+        border: 1.5px solid #ffffff;
+        background-image:
+            radial-gradient(
+                ellipse at 50% 0%,
+                rgba(255, 255, 255, 0.28) 0%,
+                rgba(255, 255, 255, 0) 60%
+            ),
+            linear-gradient(180deg, #a3202d 0%, #6b0f19 55%, #3a070d 100%);
+        color: #ffffff;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        /* El dedo lo aprieta entero, también en el filo */
+        touch-action: manipulation;
+        box-shadow:
+            inset 0 0 0 3px rgba(58, 7, 13, 0.9),
+            inset 0 0 0 4px rgba(255, 255, 255, 0.4),
+            0 4px 12px rgba(0, 0, 0, 0.45);
+        /* Escondido hasta que haya melodía que controlar */
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.8);
+        transition:
+            opacity 0.35s ease,
+            transform 0.35s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .boton-musica.visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+    }
+
+    .boton-musica:active {
+        transform: scale(0.92);
+        box-shadow:
+            inset 0 0 0 3px rgba(58, 7, 13, 0.9),
+            0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    @media (hover: hover) {
+        .boton-musica:hover {
+            box-shadow:
+                inset 0 0 0 3px rgba(58, 7, 13, 0.9),
+                inset 0 0 0 4px rgba(255, 255, 255, 0.5),
+                0 6px 16px rgba(0, 0, 0, 0.5);
+        }
+    }
+
+    .boton-musica:focus-visible {
+        outline: 2px solid #ffffff;
+        outline-offset: 3px;
+    }
+
+    .nota {
+        width: 21px;
+        height: 21px;
+    }
+
+    .oculto {
+        display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .boton-musica {
+            transition: opacity 0.35s ease;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const boton = document.getElementById("boton-musica");
+        const iconoNota = document.getElementById("icono-nota");
+        const iconoTachado = document.getElementById("icono-nota-tachada");
+        if (!boton) return;
+
+        const audio = new Audio("/musica/melodia2.mp3");
+        audio.loop = true;
+        audio.preload = "auto";
+        (window as any).audioGlobal = audio;
+
+        // Mientras suena se muestra la nota tachada (tocá para silenciar) y
+        // en pausa la nota limpia (tocá para reanudar). Se pinta escuchando
+        // al audio y no al click: queda bien aunque se corte por otro lado.
+        const pintarEstado = (sonando: boolean) => {
+            iconoTachado?.classList.toggle("oculto", !sonando);
+            iconoNota?.classList.toggle("oculto", sonando);
+        };
+        audio.addEventListener("play", () => pintarEstado(true));
+        audio.addEventListener("pause", () => pintarEstado(false));
+        pintarEstado(false);
+
+        /*
+           Con portada, el botón aparece recién cuando se toca el sobre (la
+           portada arranca la melodía y avisa "portada-abierta"). Sin
+           portada, aparece de entrada y la melodía arranca con el primer
+           toque en cualquier parte de la pantalla.
+        */
+        const hayPortada =
+            !!document.getElementById("portada-section") && !(window as any).portadaAbierta;
+        if (hayPortada) {
+            window.addEventListener("portada-abierta", () => boton.classList.add("visible"), { once: true });
+        } else {
+            boton.classList.add("visible");
+        }
+
+        // El primer toque en cualquier parte arranca la melodía, una vez.
+        // Si ese toque fue en el botón, lo maneja el botón.
+        let tocado = hayPortada;
+        const primerToque = (e: Event) => {
+            if (tocado) return;
+            tocado = true;
+            if (boton.contains(e.target as Node)) return;
+            audio.play().catch(() => {});
+        };
+        document.addEventListener("pointerdown", primerToque, { once: true });
+
+        boton.addEventListener("click", () => {
+            tocado = true;
+            if (audio.paused) audio.play().catch(() => {});
+            else audio.pause();
+        });
+    });
+</script>

@@ -1,0 +1,69 @@
+---
+// src/components/Dedicatoria.astro
+// Unas palabras de la graduada: moño, título, el texto entre comillas
+// grandes y el separador de rosas abajo.
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Dedicatoria";
+const texto =
+    "Un sueño cumplido, miles de sacrificios detrás y dos personas a quienes agradecer eternamente: mis padres. ¡Acompáñame a celebrar este gran logro!";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="dedicatoria" class="hoja">
+    <h2 class="titulo-seccion">{titulo}</h2>
+    <span class="divisor-vino" aria-hidden="true"></span>
+
+    <blockquote class="cita">
+        <span class="comilla" aria-hidden="true">“</span>
+        <p class="texto">{texto}</p>
+    </blockquote>
+
+    <img class="separador" src="/imagenes/separador.webp" alt="" width="640" height="259" loading="lazy" />
+</section>
+
+<style>
+    .cita {
+        position: relative;
+        margin: 1svh 0 0;
+        padding-top: 2.4rem;
+    }
+
+    .comilla {
+        position: absolute;
+        top: -0.6rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 4.4rem;
+        line-height: 1;
+        color: var(--rojo);
+        opacity: 0.55;
+    }
+
+    .texto {
+        font-style: italic;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: clamp(0.95rem, 4.3vw, 1.12rem);
+        line-height: 1.75;
+    }
+
+    .separador {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        margin-top: 2.6svh;
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#dedicatoria ${s}`);
+        entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.3 });
+        entrarAlHacerScroll(q(".cita"), "abajo", { retraso: 0.4, duracion: 1.8 });
+        entrarAlHacerScroll(q(".separador"), "zoom", { retraso: 0.6 });
+    });
+</script>

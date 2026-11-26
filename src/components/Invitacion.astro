@@ -1,0 +1,38 @@
+---
+// src/components/Invitacion.astro
+// El cuerpo completo de la invitación, en un solo lugar y en orden.
+// Sin portada: abre directo en el encabezado. El fondo perla, las flores y
+// el listón están fijos en el Layout.
+import Encabezado from "./Encabezado.astro";
+import Dedicatoria from "./Dedicatoria.astro";
+import Fecha from "./Fecha.astro";
+import Contador from "./Contador.astro";
+import Direccion from "./Direccion.astro";
+import RutaGraduacion from "./RutaGraduacion.astro";
+import Itinerario from "./Itinerario.astro";
+import Confirmacion from "./Confirmacion.astro";
+import Despedida from "./Despedida.astro";
+
+/*
+   Cuántos lugares reserva esta invitación. Lo manda la página:
+   index.astro no le pasa nada y queda en 0; pase[cantidad].astro le pasa
+   el número de la URL (/pase1, /pase2...). Lo usa Confirmación.
+*/
+export interface Props {
+    pases?: number;
+}
+const { pases = 0 } = Astro.props;
+---
+
+<div id="contenido-principal" data-pases={pases}>
+    <Encabezado />
+    <Dedicatoria />
+    <Fecha />
+    <Contador />
+    <Direccion />
+    <RutaGraduacion />
+    {/* Itinerario deshabilitado por ahora: se vuelve a habilitar sacando este comentario */}
+    {/* <Itinerario /> */}
+    <Confirmacion pases={pases} />
+    <Despedida />
+</div>

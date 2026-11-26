@@ -1,0 +1,283 @@
+---
+// src/components/Portada.astro
+// La portada: tapa la invitación con el mismo fondo perla hasta que el
+// invitado toca el sobre. Las flores y el listón del marco (Layout) quedan
+// por delante, así la portada se ve como parte de la misma hoja.
+//
+// Al tocar el sobre: arranca la música (el navegador solo deja sonar un
+// audio con un gesto de la persona; la melodía la crea BotonMusica y queda
+// en window.audioGlobal), el sobre sube y se desvanece en una luz suave, y
+// recién cuando la portada desapareció se avisa "portada-abierta" para que
+// las secciones hagan su entrada (ver utils/entradas.ts).
+//
+// Se monta desde las páginas en el slot "portada" del Layout: tiene que
+// quedar fuera de la ventana del panel, que recorta todo lo de adentro.
+import { graduada } from "../utils/evento";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const tituloGrande = "Te invito";
+const tituloResto = "con mucho cariño a mi graduación";
+const llamada = "Toca el sobre para abrir";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="portada-section" class="portada" aria-label="Portada de la invitación">
+    <div class="contenido-portada">
+        <div class="cabecera" id="po-cabecera">
+            <h1 class="titulo-seccion grande">{tituloGrande}</h1>
+            <p class="rotulo resto">{tituloResto}</p>
+            <span class="divisor-vino filete" aria-hidden="true"></span>
+            <p class="nombre">{graduada.nombres}</p>
+        </div>
+
+        <!-- El sobre entero es el botón -->
+        <button id="btn-sobre" type="button" class="sobre" aria-label="Abrir la invitación">
+            <span class="flota" id="po-flota">
+                <img src="/imagenes/sobre.webp" alt="" width="720" height="506" fetchpriority="high" />
+                <!-- Brillo que late sobre el lacre dorado -->
+                <span class="lacre-luz" id="po-lacre" aria-hidden="true"></span>
+            </span>
+        </button>
+
+        <p class="llamada" id="po-llamada">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-.5V4a1.5 1.5 0 0 1 3 0v6m0-.5V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1.3a6 6 0 0 1-4.8-2.4L3.6 14a1.6 1.6 0 0 1 2.4-2.1L9 14.5" />
+            </svg>
+            {llamada}
+        </p>
+    </div>
+
+    <!-- Luz suave que llena la hoja al abrir -->
+    <span class="resplandor" id="po-resplandor" aria-hidden="true"></span>
+</section>
+
+<style>
+    /* Del ancho de la columna, fija, entre la invitación y los adornos */
+    .portada {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 100%;
+        max-width: 430px;
+        transform: translateX(-50%);
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background-image:
+            url("/imagenes/fondoperla.webp"),
+            linear-gradient(#f3e6d8, #f3e6d8);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+    }
+
+    .portada.cerrada {
+        display: none;
+    }
+
+    /* Dentro del panel liso, lejos de las flores y del listón */
+    .contenido-portada {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 0 14%;
+        text-align: center;
+    }
+
+    .cabecera {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .grande {
+        font-size: clamp(2.7rem, 13vw, 3.5rem);
+    }
+
+    .resto {
+        margin-top: 0.4svh;
+        font-size: clamp(0.85rem, 3.9vw, 1rem);
+        font-weight: 600;
+    }
+
+    .filete {
+        margin: 2svh auto 1.4svh;
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    .filete::after {
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    .nombre {
+        margin: 0;
+        font-family: "Alex Brush", "Great Vibes", cursive;
+        font-size: clamp(2rem, 9.6vw, 2.7rem);
+        line-height: 1.15;
+        white-space: nowrap;
+        color: var(--vino);
+        padding: 0 0.3em;
+    }
+
+    /* ── El sobre ────────────────────────────────────────────── */
+    .sobre {
+        width: 100%;
+        max-width: 300px;
+        margin-top: 3.6svh;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .flota {
+        position: relative;
+        display: block;
+    }
+
+    .flota img {
+        display: block;
+        width: 100%;
+        height: auto;
+        filter: drop-shadow(0 14px 22px rgba(58, 7, 13, 0.35));
+    }
+
+    /* El lacre está al centro, a 58% de alto de la imagen */
+    .lacre-luz {
+        position: absolute;
+        left: 50%;
+        top: 58%;
+        width: 26%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        background-image: radial-gradient(circle, rgba(255, 226, 150, 0.6) 0%, rgba(255, 226, 150, 0) 68%);
+        pointer-events: none;
+        animation: latir 2.2s ease-in-out infinite;
+    }
+
+    @keyframes latir {
+        0%, 100% {
+            opacity: 0.2;
+            transform: translate(-50%, -50%) scale(0.85);
+        }
+        50% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+    }
+
+    .llamada {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5em;
+        margin: 3.4svh 0 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 600;
+        font-size: clamp(0.88rem, 4vw, 1rem);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dorado);
+        animation: respirar 2.2s ease-in-out infinite;
+    }
+
+    .llamada svg {
+        width: 1.3em;
+        height: 1.3em;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    @keyframes respirar {
+        0%, 100% { opacity: 0.55; }
+        50% { opacity: 1; }
+    }
+
+    .resplandor {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at 50% 58%, rgba(255, 250, 240, 1) 0%, rgba(255, 246, 232, 0.9) 45%, rgba(255, 246, 232, 0) 80%);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .lacre-luz,
+        .llamada {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    import { gsap } from "gsap";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const portada = document.getElementById("portada-section");
+        const boton = document.getElementById("btn-sobre");
+        const cabecera = document.getElementById("po-cabecera");
+        const flota = document.getElementById("po-flota");
+        const llamada = document.getElementById("po-llamada");
+        const lacre = document.getElementById("po-lacre");
+        const resplandor = document.getElementById("po-resplandor");
+        if (!portada || !boton || !flota) return;
+
+        const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let abriendo = false;
+
+        // ── Entrada de la portada ───────────────────────────────
+        if (!quieto) {
+            const tl = gsap.timeline({ delay: 0.3 });
+            tl.from(cabecera, { opacity: 0, y: -24, duration: 1.2, ease: "power3.out" })
+                .from(flota, { opacity: 0, y: 40, scale: 0.85, duration: 1.2, ease: "back.out(1.4)" }, 0.4)
+                .from(llamada, { opacity: 0, y: 12, duration: 0.8, ease: "power2.out" }, 1.1)
+                // El sobre flota apenas, hasta que lo toquen
+                .add(() => {
+                    if (abriendo) return;
+                    gsap.to(flota, { y: -8, rotate: 0.6, duration: 2.6, repeat: -1, yoyo: true, ease: "sine.inOut" });
+                });
+        }
+
+        // Aviso para que las secciones recién ahora hagan su entrada
+        const avisarApertura = () => {
+            portada.classList.add("cerrada");
+            (window as any).portadaAbierta = true;
+            window.dispatchEvent(new Event("portada-abierta"));
+        };
+
+        boton.addEventListener("click", () => {
+            if (abriendo) return;
+            abriendo = true;
+
+            // La música arranca con este toque
+            const audio = (window as any).audioGlobal as HTMLAudioElement | undefined;
+            audio?.play().catch(() => {});
+
+            if (quieto) {
+                avisarApertura();
+                return;
+            }
+
+            gsap.killTweensOf(flota);
+            gsap.timeline({ onComplete: avisarApertura })
+                // Las animaciones de CSS le ganan a GSAP: se apagan
+                .set([lacre, llamada], { animation: "none" }, 0)
+                .to(llamada, { opacity: 0, duration: 0.3 }, 0)
+                .to(cabecera, { opacity: 0, y: -20, duration: 0.6, ease: "power2.in" }, 0)
+                // El sobre sube y se agranda apenas mientras se ilumina
+                .to(flota, { y: -30, scale: 1.08, duration: 0.8, ease: "power2.out" }, 0)
+                .to(resplandor, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0.25)
+                .to(flota, { opacity: 0, duration: 0.5 }, 0.55)
+                // La hoja de la portada se disuelve y deja ver la invitación
+                .to(portada, { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 0.9);
+        });
+    });
+</script>

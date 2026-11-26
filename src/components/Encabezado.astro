@@ -1,0 +1,251 @@
+---
+// src/components/Encabezado.astro
+// La primera pantalla, como el diseño de referencia: birrete, "Te invito
+// a mi GRADUACIÓN", el nombre en cursiva, la carrera y la universidad.
+// Las flores, el moño y el listón están fijos en el Layout.
+// Los datos vienen de utils/evento.ts.
+import { graduada, titulo, carrera, universidad } from "../utils/evento";
+
+/*
+   Nombres en un renglón y apellidos en otro, sin partirse. El tamaño sale
+   del renglón más largo: se calcula acá una sola vez y viaja como variable
+   CSS, así no hay un script que lo recalcule y la letra no salta al cargar.
+*/
+const largoNombre = Math.max(graduada.nombres.length, graduada.apellidos.length);
+---
+
+<section id="encabezado" class="hoja">
+
+    <div class="contenido">
+        <!-- Birrete negro con su moño vino -->
+        <svg class="birrete" viewBox="0 0 120 80" aria-hidden="true">
+            <path d="M30 36v16c0 7 13.5 12 30 12s30-5 30-12V36L60 48z" fill="#1d1416" />
+            <path d="M60 10 4 30l56 20 56-20z" fill="#2a1d20" />
+            <path d="M60 10 4 30l56 20 56-20z" fill="none" stroke="#4a3a3d" stroke-width="1" />
+            <path d="M60 30c14 1 26 3 34 6v20" fill="none" stroke="#8e1622" stroke-width="2.4" stroke-linecap="round" />
+            <path d="M94 55c-3 2-4 9-2 15M94 55c3 2 4 9 2 15M94 55v16" fill="none" stroke="#a51d2b" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M60 30c-9-7-19-6-18 0s10 5 18 0zM60 30c9-7 19-6 18 0s-10 5-18 0z" fill="#8e1622" />
+            <circle cx="60" cy="30" r="3.4" fill="#5b0f18" />
+        </svg>
+
+        <p class="rotulo invito">Te invito a mi</p>
+        <h1 class="grande oro">Graduación</h1>
+        <span class="divisor-vino" aria-hidden="true"></span>
+
+        <!-- El nombre puede bajar de renglón: no se fuerza a una línea -->
+        <p class="nombre" style={`--largo:${largoNombre}`}>
+            <span>{graduada.nombres}</span>
+            <span>{graduada.apellidos}</span>
+        </p>
+
+        <p class="rotulo licenciatura">{titulo}</p>
+        <p class="carrera oro">{carrera}</p>
+        <p class="universidad">{universidad}</p>
+        <!-- Tres flechitas que se encienden en cascada: invitan a deslizar -->
+        <span class="deslizar" aria-hidden="true">
+            <svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8" /></svg>
+            <svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8" /></svg>
+            <svg viewBox="0 0 24 12"><path d="M3 2l9 8 9-8" /></svg>
+        </span>
+    </div>
+
+</section>
+
+<style>
+    /*
+       Tres bloques con aire parejo entre ellos: birrete + "Te invito a mi
+       GRADUACIÓN" / el nombre / carrera + universidad + flechitas. Los
+       espacios van en svh para que se repartan igual en pantallas cortas
+       y largas.
+    */
+    .contenido {
+        position: relative;
+        width: 100%;
+        /* El nombre mide su letra contra este ancho (unidades cqi) */
+        container-type: inline-size;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .birrete {
+        width: clamp(78px, 24vw, 104px);
+        height: auto;
+        margin-bottom: 2.2svh;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+    }
+
+    .invito {
+        color: var(--vino);
+        font-weight: 600;
+    }
+
+    /* Dorado liso, sin degradado */
+    .oro {
+        color: var(--dorado);
+    }
+
+    #encabezado .divisor-vino {
+        margin: 2.2svh auto 1.6svh;
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    #encabezado .divisor-vino::after {
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    .grande {
+        margin: 0.8svh 0 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 800;
+        font-size: clamp(1.7rem, 8.8vw, 2.4rem);
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .nombre {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        white-space: nowrap;
+        margin: 0;
+        font-family: "Alex Brush", "Great Vibes", cursive;
+        font-weight: 400;
+        /*
+           Dos renglones: nombres / apellidos, cada uno entero. Alex Brush
+           ocupa unos 0.4em por letra: con el ancho disponible (100cqi)
+           dividido el largo del renglón más largo, entra siempre. Tope de
+           2.9rem para nombres cortos, piso de 1.6rem para que se lea.
+        */
+        font-size: clamp(1.6rem, calc(100cqi * 2.35 / var(--largo)), 2.9rem);
+        line-height: 1.12;
+        letter-spacing: normal;
+        color: var(--vino);
+        padding: 0 0.3em 0.1em;
+    }
+
+    .licenciatura {
+        margin-top: 3svh;
+        font-weight: 600;
+    }
+
+    .carrera {
+        margin: 0.8svh 0 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: clamp(0.95rem, 4.3vw, 1.22rem);
+        line-height: 1.25;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .universidad {
+        margin: 2.4svh 0 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: clamp(1.3rem, 6.4vw, 1.65rem);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding-left: 0.18em; /* compensa el espaciado de la última letra */
+        color: var(--rojo);
+    }
+
+    .deslizar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 2.6svh;
+    }
+
+    .deslizar svg {
+        display: block;
+        width: 34px;
+        height: 17px;
+        margin-top: -3px;
+        fill: none;
+        stroke: var(--dorado);
+        stroke-width: 2.4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: 0.25;
+        animation: cascada 1.8s ease-in-out infinite;
+    }
+
+    .deslizar svg:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .deslizar svg:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    /* Se encienden de arriba hacia abajo y bajan un poquito */
+    @keyframes cascada {
+        0%, 100% {
+            opacity: 0.25;
+            transform: translateY(0);
+        }
+        40% {
+            opacity: 1;
+            transform: translateY(3px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .deslizar svg {
+            animation: none;
+            opacity: 0.8;
+        }
+    }
+
+    /*
+       Celulares bajos (iPhone SE, Android chicos): la primera pantalla
+       tiene que entrar entera en el panel. Se achica lo grande (birrete,
+       GRADUACIÓN, nombre) y los espacios; los textos chicos no se tocan.
+    */
+    @media (max-height: 740px) {
+        .birrete {
+            width: 62px;
+            margin-bottom: 1.2svh;
+        }
+        .grande {
+            font-size: clamp(1.5rem, 7.8vw, 2rem);
+        }
+        #encabezado .divisor-vino {
+            margin: 1.4svh auto 0.8svh;
+        }
+        .nombre {
+            font-size: clamp(1.6rem, calc(100cqi * 2.35 / var(--largo)), 2.5rem);
+        }
+        .licenciatura {
+            margin-top: 1.6svh;
+        }
+        .carrera {
+            margin-top: 0.4svh;
+        }
+        .universidad {
+            margin-top: 1.4svh;
+        }
+        .deslizar {
+            margin-top: 1.4svh;
+        }
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#encabezado ${s}`);
+        entrarAlHacerScroll(q(".birrete"), "zoom", { retraso: 0.2 });
+        entrarAlHacerScroll(q(".invito"), "abajo", { retraso: 0.35 });
+        entrarAlHacerScroll(q(".grande"), "zoom", { retraso: 0.45 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.6 });
+        entrarAlHacerScroll(q(".nombre"), "abajo", { retraso: 0.7, duracion: 1.8 });
+        entrarAlHacerScroll(q(".licenciatura"), "izquierda", { retraso: 0.9 });
+        entrarAlHacerScroll(q(".carrera"), "derecha", { retraso: 1 });
+        entrarAlHacerScroll(q(".universidad"), "abajo", { retraso: 1.15 });
+        entrarAlHacerScroll(q(".deslizar"), "abajo", { retraso: 1.3 });
+    });
+</script>

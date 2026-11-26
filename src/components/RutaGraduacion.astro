@@ -1,0 +1,225 @@
+---
+// src/components/RutaGraduacion.astro
+// "Ruta día del Acto de Graduación", tal como la manda la universidad:
+// cuatro momentos en zigzag, cada uno con su medallón (ícono), la hora en
+// una pastilla vino y el detalle. Los medallones se unen con un camino de
+// trazos que baja de uno al siguiente. Arriba lleva el separador de rosas.
+// Va debajo de Ubicación.
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Ruta del día";
+const subtitulo = "Acto de graduación";
+/* icono: grupo, birrete, medalla (dibujados más abajo) */
+const momentos = [
+    { hora: "08:15", nombre: "Ingreso Campus Tiquipaya", lineas: ["Lugar: Coliseo Polifuncional"], icono: "grupo" },
+    { hora: "09:00", nombre: "Formación de los Graduados", lineas: ["Lugar: Coliseo Polifuncional", "Graduado más 1 acompañante"], icono: "grupo" },
+    { hora: "09:30", nombre: "Acto de Graduación", lineas: ["Lugar: Coliseo Polifuncional"], icono: "birrete" },
+    { hora: "11:30", nombre: "Conclusión de la Graduación", lineas: [], icono: "medalla" },
+];
+// ──────────────────────────────────────────────────────────────
+
+/* Íconos rellenos en una caja de 24x24 */
+const iconos: Record<string, string> = {
+    grupo:
+        "M12 3.2a2.6 2.6 0 1 1 0 5.2 2.6 2.6 0 0 1 0-5.2zM6.6 5.4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm10.8 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM8.6 10.2c0-1 .8-1.6 1.8-1.6h3.2c1 0 1.8.6 1.8 1.6V20H8.6zM3.6 11.6c0-.9.7-1.4 1.5-1.4h2.6V19H3.6zm12.7-1.4h2.6c.8 0 1.5.5 1.5 1.4V19h-4.1z",
+    birrete:
+        "M12 4 1.5 8.6 12 13.2l8.2-3.6v5.2a.9.9 0 0 0 1.8 0V8.6zM6 12.2v3.4c0 1.8 2.7 3.2 6 3.2s6-1.4 6-3.2v-3.4l-6 2.6z",
+    medalla:
+        "m12 2 1.6 1.4 2.1-.4.8 2 2 .8-.4 2.1L19.5 9.5l-1.4 1.6.4 2.1-2 .8-.8 2-2.1-.4L12 17l-1.6-1.4-2.1.4-.8-2-2-.8.4-2.1L4.5 9.5l1.4-1.6-.4-2.1 2-.8.8-2 2.1.4zM7.8 16.6 5.5 22l2.6-.9 1.3 2.4 2-4.6zm8.4 0 2.3 5.4-2.6-.9-1.3 2.4-2-4.6z",
+};
+---
+
+<section id="ruta" class="hoja">
+    <img class="separador" src="/imagenes/separador.webp" alt="" width="640" height="259" loading="lazy" />
+
+    <h2 class="titulo-seccion">{titulo}</h2>
+    <p class="rotulo bajada">{subtitulo}</p>
+    <span class="divisor-vino" aria-hidden="true"></span>
+
+    <ol class="ruta">
+        {
+            momentos.map((m, i) => (
+                <>
+                    {/* El camino de trazos desde el medallón anterior */}
+                    {i > 0 && (
+                        <li class:list={["tramo", i % 2 === 1 ? "a-derecha" : "a-izquierda"]} aria-hidden="true" />
+                    )}
+                    <li class:list={["paso", i % 2 === 0 ? "medallon-izq" : "medallon-der"]}>
+                        <span class="medallon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d={iconos[m.icono] ?? iconos.grupo} />
+                            </svg>
+                        </span>
+                        <span class="detalle">
+                            <span class="hora">{m.hora}</span>
+                            <span class="nombre">{m.nombre}</span>
+                            {m.lineas.map((l) => (
+                                <span class="linea">{l}</span>
+                            ))}
+                        </span>
+                    </li>
+                </>
+            ))
+        }
+    </ol>
+</section>
+
+<style>
+    .separador {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        margin-bottom: 2svh;
+    }
+
+    .bajada {
+        margin-top: 0.6svh;
+        font-size: clamp(0.92rem, 4.2vw, 1.05rem);
+        font-weight: 600;
+    }
+
+    .ruta {
+        --medallon: 70px;
+        list-style: none;
+        width: 106%;
+        margin: 1.4svh 0 0;
+        padding: 0;
+    }
+
+    /* ── Un momento: medallón a un lado, detalle al otro ────── */
+    .paso {
+        display: grid;
+        align-items: center;
+        column-gap: 12px;
+    }
+
+    .medallon-izq {
+        grid-template-columns: var(--medallon) 1fr;
+        text-align: left;
+    }
+
+    .medallon-der {
+        grid-template-columns: 1fr var(--medallon);
+        text-align: right;
+    }
+
+    .medallon-der .medallon {
+        order: 2;
+    }
+
+    .medallon-der .detalle {
+        align-items: flex-end;
+    }
+
+    /* Aro vino, aro perla de afuera y centro blanco, como en la ruta original */
+    .medallon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--medallon);
+        height: var(--medallon);
+        border-radius: 50%;
+        border: 4px solid var(--rojo);
+        background-image: radial-gradient(circle, #ffffff 55%, #f1ebe6 100%);
+        box-shadow:
+            0 0 0 4px #e6dcd3,
+            0 6px 14px rgba(58, 7, 13, 0.22);
+    }
+
+    .medallon svg {
+        width: 34px;
+        height: 34px;
+        fill: #2a1d20;
+    }
+
+    .detalle {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2em;
+    }
+
+    .hora {
+        display: inline-block;
+        padding: 0.15em 0.75em;
+        border-radius: 999px;
+        background-image: linear-gradient(var(--rojo), var(--rojo));
+        color: #fff7f0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-variant-numeric: lining-nums;
+        font-size: clamp(1rem, 4.6vw, 1.15rem);
+        margin-bottom: 0.2em;
+    }
+
+    .nombre {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: clamp(0.92rem, 4.2vw, 1.05rem);
+        line-height: 1.25;
+        color: var(--vino-oscuro);
+    }
+
+    .linea {
+        font-family: "Montserrat", system-ui, sans-serif;
+        font-size: clamp(0.76rem, 3.4vw, 0.86rem);
+        line-height: 1.4;
+        color: var(--vino);
+    }
+
+    /*
+       ── El camino entre medallones ───────────────────────────
+       Va de centro a centro de los medallones: baja del de arriba, cruza
+       y baja al de abajo. La mitad izquierda dibuja la bajada y el cruce,
+       la derecha la llegada. Para ir hacia la izquierda se espeja.
+    */
+    .tramo {
+        position: relative;
+        height: 30px;
+        margin: 4px calc(var(--medallon) / 2);
+    }
+
+    .tramo::before,
+    .tramo::after {
+        content: "";
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        border: 0 dashed var(--rojo);
+    }
+
+    .tramo::before {
+        left: 0;
+        top: 0;
+        border-left-width: 2px;
+        border-bottom-width: 2px;
+        border-bottom-left-radius: 12px;
+    }
+
+    .tramo::after {
+        right: 0;
+        bottom: 0;
+        height: calc(50% + 2px);
+        border-right-width: 2px;
+        border-top-width: 2px;
+        border-top-right-radius: 12px;
+    }
+
+    .tramo.a-izquierda {
+        transform: scaleX(-1);
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#ruta ${s}`);
+        entrarAlHacerScroll(q(".separador"), "zoom");
+        entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
+        entrarAlHacerScroll(q(".bajada"), "abajo", { retraso: 0.3 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.4 });
+        document.querySelectorAll("#ruta .paso").forEach((p, i) =>
+            entrarAlHacerScroll(p, i % 2 === 0 ? "izquierda" : "derecha", { retraso: 0.1 }),
+        );
+    });
+</script>

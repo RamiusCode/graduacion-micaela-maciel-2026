@@ -1,0 +1,92 @@
+---
+// src/components/Despedida.astro
+// La última pantalla: "¡Gracias!", unas palabras y la firma.
+import { graduada } from "../utils/evento";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "¡Gracias!";
+const texto =
+    "Tu presencia es el mejor regalo. Gracias por ser parte de uno de los momentos más importantes de mi vida y de los recuerdos que guardaré para siempre.";
+const antesDeFirma = "Con cariño,";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="despedida" class="hoja">
+
+    <div class="contenido">
+        <h2 class="titulo-seccion gracias">{titulo}</h2>
+        <span class="divisor-vino" aria-hidden="true"></span>
+        <p class="texto mensaje">{texto}</p>
+        <p class="rotulo antes">{antesDeFirma}</p>
+        <p class="firma">{graduada.nombres}</p>
+        <!-- Cierre dorado, como el filete del encabezado -->
+        <span class="divisor-vino cierre" aria-hidden="true"></span>
+    </div>
+
+</section>
+
+<style>
+
+
+
+    .contenido {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .gracias {
+        font-size: clamp(3.2rem, 16vw, 4.2rem);
+    }
+
+    .mensaje {
+        font-style: italic;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: clamp(0.95rem, 4.3vw, 1.1rem);
+    }
+
+    .antes {
+        margin-top: 3svh;
+        font-weight: 600;
+        color: var(--dorado);
+    }
+
+    .firma {
+        margin: 0;
+        font-family: "Alex Brush", "Great Vibes", cursive;
+        font-weight: 400;
+        /* En un renglón; Alex Brush es angosta y los nombres entran */
+        white-space: nowrap;
+        font-size: clamp(2rem, 9.4vw, 2.8rem);
+        line-height: 1.15;
+        letter-spacing: normal;
+        color: var(--vino);
+        padding: 0 0.3em;
+    }
+
+    /* Filete dorado de cierre, debajo de la firma */
+    .cierre {
+        margin: 1.4svh auto 0;
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    .cierre::after {
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#despedida ${s}`);
+        entrarAlHacerScroll(q(".gracias"), "zoom", { retraso: 0.2 });
+        entrarAlHacerScroll(q(".divisor-vino:not(.cierre)"), "zoom", { retraso: 0.35 });
+        entrarAlHacerScroll(q(".mensaje"), "abajo", { retraso: 0.45, duracion: 1.8 });
+        entrarAlHacerScroll(q(".antes"), "izquierda", { retraso: 0.65 });
+        entrarAlHacerScroll(q(".firma"), "derecha", { retraso: 0.75 });
+        entrarAlHacerScroll(q(".cierre"), "zoom", { retraso: 0.9 });
+    });
+</script>

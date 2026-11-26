@@ -1,0 +1,129 @@
+---
+// src/components/Contador.astro
+// Cuenta regresiva hacia el acto de graduación: días, horas, minutos y
+// segundos en cuatro cajitas perla con filete vino. La fecha sale de
+// utils/evento.ts (la misma que muestra la sección Fecha).
+import { fechaIso } from "../utils/evento";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Falta poco";
+const texto = "Para este día tan especial";
+// ──────────────────────────────────────────────────────────────
+
+const unidades = [
+    { u: "d", rotulo: "Días" },
+    { u: "h", rotulo: "Horas" },
+    { u: "m", rotulo: "Minutos" },
+    { u: "s", rotulo: "Segundos" },
+];
+---
+
+<section id="contador" class="hoja">
+    <h2 class="titulo-seccion">{titulo}</h2>
+    <p class="rotulo bajada">{texto}</p>
+    <span class="divisor-vino" aria-hidden="true"></span>
+
+    <div
+        class="cuenta"
+        id="ct-cuenta"
+        data-fecha={fechaIso}
+        role="timer"
+        aria-label="Cuenta regresiva para la graduación"
+    >
+        {
+            unidades.map((x) => (
+                <div class="unidad">
+                    <span class="numero" data-u={x.u}>00</span>
+                    <span class="nombre-unidad">{x.rotulo}</span>
+                </div>
+            ))
+        }
+    </div>
+</section>
+
+<style>
+    .bajada {
+        margin-top: 0.6svh;
+    }
+
+    .cuenta {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        width: 106%; /* un poco más ancho que el texto, sin pasar el borde del panel */
+        margin-top: 2svh;
+    }
+
+    .unidad {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5em;
+        padding: 0.9em 0 0.75em;
+        border: 1px solid rgba(91, 15, 24, 0.45);
+        border-radius: 10px;
+        /* perla translúcida, como imagen por el modo oscuro forzado */
+        background-image: linear-gradient(rgba(255, 250, 244, 0.75), rgba(255, 250, 244, 0.75));
+        box-shadow:
+            inset 0 0 0 3px rgba(255, 250, 244, 0.9),
+            inset 0 0 0 4px rgba(91, 15, 24, 0.18),
+            0 6px 14px rgba(58, 7, 13, 0.1);
+    }
+
+    /* Números del mismo ancho: la cuenta no salta */
+    .numero {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-variant-numeric: lining-nums tabular-nums;
+        font-size: clamp(1.6rem, 8vw, 2.2rem);
+        line-height: 1;
+        color: var(--rojo);
+    }
+
+    .nombre-unidad {
+        font-family: "Montserrat", system-ui, sans-serif;
+        font-weight: 500;
+        font-size: clamp(0.6rem, 2.6vw, 0.74rem);
+        text-transform: uppercase;
+        letter-spacing: 0;
+        color: var(--vino);
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const cuenta = document.getElementById("ct-cuenta");
+        if (!cuenta) return;
+
+        const destino = new Date(cuenta.dataset.fecha ?? "").getTime();
+        const nums: Record<string, HTMLElement | null> = {
+            d: cuenta.querySelector('[data-u="d"]'),
+            h: cuenta.querySelector('[data-u="h"]'),
+            m: cuenta.querySelector('[data-u="m"]'),
+            s: cuenta.querySelector('[data-u="s"]'),
+        };
+        const dos = (n: number) => String(n).padStart(2, "0");
+
+        const pintar = () => {
+            // Si ya pasó la hora, queda todo en cero
+            let resto = Math.max(0, Math.floor((destino - Date.now()) / 1000));
+            if (Number.isNaN(resto)) resto = 0;
+            if (nums.d) nums.d.textContent = dos(Math.floor(resto / 86400));
+            if (nums.h) nums.h.textContent = dos(Math.floor((resto % 86400) / 3600));
+            if (nums.m) nums.m.textContent = dos(Math.floor((resto % 3600) / 60));
+            if (nums.s) nums.s.textContent = dos(resto % 60);
+        };
+        pintar();
+        window.setInterval(pintar, 1000);
+
+        const q = (s: string) => document.querySelector(`#contador ${s}`);
+        entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
+        entrarAlHacerScroll(q(".bajada"), "abajo", { retraso: 0.3 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.4 });
+        document.querySelectorAll("#contador .unidad").forEach((u, i) =>
+            entrarAlHacerScroll(u, "abajo", { retraso: 0.5 + i * 0.12 }),
+        );
+    });
+</script>

@@ -1,0 +1,152 @@
+---
+// src/components/Confirmacion.astro
+// Confirmación de asistencia por WhatsApp: el invitado escribe su nombre y
+// el botón abre el chat con el mensaje ya armado. Si la invitación es un
+// pase (/pase2...), muestra cuántos lugares tiene reservados.
+import { frasePases } from "../utils/frasePases";
+import { graduada, fechaLarga } from "../utils/evento";
+
+export interface Props {
+    pases?: number;
+}
+const { pases = 0 } = Astro.props;
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Confirma tu asistencia";
+const texto = "Tu presencia hará que este día sea aún más especial.";
+const textoCampo = "Escribe tu nombre";
+const textoBoton = "Confirmar";
+/*
+   WhatsApp donde llegan las confirmaciones: con código de país y sin el
+   + ni espacios (ej. 5917xxxxxxx). Mientras esté vacío, el botón no lleva a
+   ningún lado.
+*/
+const telefono = "59179727147"; // Bolivia (591) + 79727147
+/*
+   {nombre} se reemplaza por lo que escribe el invitado. Si lo deja vacío va
+   "(mi nombre)" para que lo complete en WhatsApp antes de enviar.
+*/
+const plantilla = `Soy {nombre}. Me complace confirmar mi asistencia a la graduación de ${graduada.nombres}, que se realizará el ${fechaLarga}. ¡Muchas gracias, estaré sin falta!`;
+const nombreVacio = "(mi nombre)";
+// ──────────────────────────────────────────────────────────────
+
+const enlace = telefono
+    ? `https://wa.me/${telefono}?text=${encodeURIComponent(plantilla.replace("{nombre}", nombreVacio))}`
+    : "#";
+const fraseDePases = frasePases(pases);
+---
+
+<section id="confirmacion" class="hoja">
+    <h2 class="titulo-seccion">{titulo}</h2>
+    <span class="divisor-vino" aria-hidden="true"></span>
+    <p class="texto aviso">{texto}</p>
+
+    {fraseDePases && <p class="pases">{fraseDePases}</p>}
+
+    <label class="campo">
+        <span class="solo-lectores">{textoCampo}</span>
+        <input id="cf-nombre" type="text" placeholder={textoCampo} autocomplete="name" maxlength="60" />
+    </label>
+
+    <a
+        id="cf-boton"
+        class="boton-vino boton"
+        href={enlace}
+        target="_blank"
+        rel="noopener"
+        data-telefono={telefono}
+        data-plantilla={plantilla}
+        data-vacio={nombreVacio}
+    >
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z" />
+        </svg>
+        {textoBoton}
+    </a>
+</section>
+
+<style>
+    .aviso {
+        margin-top: 0.4svh;
+    }
+
+    .pases {
+        margin: 2.4svh 0 0;
+        padding: 0.6em 1.4em;
+        border: 1px solid rgba(91, 15, 24, 0.5);
+        border-radius: 999px;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 600;
+        font-size: clamp(0.82rem, 3.7vw, 0.95rem);
+        color: var(--rojo);
+        background-image: linear-gradient(rgba(255, 250, 244, 0.7), rgba(255, 250, 244, 0.7));
+    }
+
+    .campo {
+        width: 100%;
+        margin-top: 3svh;
+    }
+
+    .campo input {
+        width: 100%;
+        padding: 0.85em 1.1em;
+        border: 1px solid rgba(91, 15, 24, 0.45);
+        border-radius: 999px;
+        outline: none;
+        background-image: linear-gradient(rgba(255, 250, 244, 0.9), rgba(255, 250, 244, 0.9));
+        font-family: "Montserrat", system-ui, sans-serif;
+        font-size: 16px; /* 16px: así el iPhone no hace zoom al tocar el campo */
+        text-align: center;
+        color: var(--vino-oscuro);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .campo input::placeholder {
+        color: rgba(91, 15, 24, 0.5);
+    }
+
+    .campo input:focus {
+        border-color: var(--rojo);
+        box-shadow: 0 0 0 3px rgba(142, 22, 34, 0.15);
+    }
+
+    .boton {
+        margin-top: 2svh;
+    }
+
+    .solo-lectores {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // El nombre escrito va dentro del mensaje de WhatsApp
+        const boton = document.getElementById("cf-boton") as HTMLAnchorElement | null;
+        const campo = document.getElementById("cf-nombre") as HTMLInputElement | null;
+        if (boton && campo && boton.dataset.telefono) {
+            const armar = () => {
+                const nombre = campo.value.trim() || boton.dataset.vacio || "";
+                const texto = (boton.dataset.plantilla ?? "").replace("{nombre}", nombre);
+                boton.href = `https://wa.me/${boton.dataset.telefono}?text=${encodeURIComponent(texto)}`;
+            };
+            campo.addEventListener("input", armar);
+            armar();
+        }
+
+        const q = (s: string) => document.querySelector(`#confirmacion ${s}`);
+        entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.3 });
+        entrarAlHacerScroll(q(".aviso"), "izquierda", { retraso: 0.4 });
+        entrarAlHacerScroll(q(".pases"), "derecha", { retraso: 0.5 });
+        entrarAlHacerScroll(q(".campo"), "derecha", { retraso: 0.55 });
+        entrarAlHacerScroll(q(".boton"), "zoom", { retraso: 0.7 });
+    });
+</script>

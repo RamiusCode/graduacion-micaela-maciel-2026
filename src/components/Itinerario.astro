@@ -1,0 +1,149 @@
+---
+// src/components/Itinerario.astro
+// Línea de tiempo de la noche: la hora a la izquierda, un medallón vino con
+// su ícono en el medio y el momento con una frase corta a la derecha.
+// ── DATOS EDITABLES (horarios de muestra: confirmar con el cliente) ──
+const titulo = "Itinerario";
+const texto = "Así celebraremos";
+/* icono: birrete, copas, cena, musica, estrella (dibujados más abajo) */
+const momentos = [
+    { hora: "18:00", nombre: "Bienvenida", frase: "Te recibo para celebrar juntos este logro.", icono: "birrete" },
+    { hora: "19:00", nombre: "Brindis", frase: "Alzamos las copas por las metas cumplidas.", icono: "copas" },
+    { hora: "19:30", nombre: "Cena", frase: "Compartimos la mesa y los recuerdos.", icono: "cena" },
+    { hora: "20:30", nombre: "Vals", frase: "Un baile para abrir la noche.", icono: "musica" },
+    { hora: "21:00", nombre: "¡A celebrar!", frase: "Música y fiesta hasta que el cuerpo aguante.", icono: "estrella" },
+];
+// ──────────────────────────────────────────────────────────────
+
+/* Íconos de trazo en una caja de 24x24: una lista de trazos (path d=...) */
+const iconos: Record<string, string[]> = {
+    birrete: ["M12 5 2 9.5l10 4.5 10-4.5z", "M6 11.5v4.5c0 1.6 2.7 3 6 3s6-1.4 6-3v-4.5", "M22 9.5v5"],
+    copas: ["M5 3h5l-.4 4.6a2.1 2.1 0 0 1-4.2 0z", "M7.5 9.8V20M5 20h5", "M14 3h5l-.4 4.6a2.1 2.1 0 0 1-4.2 0z", "M16.5 9.8V20M14 20h5"],
+    cena: ["M4 3v6a2 2 0 0 0 4 0V3M6 9v12", "M17 21V3c-2.5 1.2-3.5 4-3.5 8h3.5"],
+    musica: ["M9 18V6l11-2v12", "M9 10l11-2", "M6.5 20.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z", "M17.5 18.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"],
+    estrella: ["M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"],
+};
+---
+
+<section id="itinerario" class="hoja">
+    <h2 class="titulo-seccion">{titulo}</h2>
+    <p class="rotulo bajada">{texto}</p>
+    <span class="divisor-vino" aria-hidden="true"></span>
+
+    <ol class="linea">
+        {
+            momentos.map((m) => (
+                <li class="momento">
+                    <span class="hora">{m.hora}</span>
+                    <span class="medallon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            {(iconos[m.icono] ?? iconos.estrella).map((d) => <path d={d} />)}
+                        </svg>
+                    </span>
+                    <span class="detalle">
+                        <span class="nombre">{m.nombre}</span>
+                        <span class="frase">{m.frase}</span>
+                    </span>
+                </li>
+            ))
+        }
+    </ol>
+</section>
+
+<style>
+    .bajada {
+        margin-top: 0.6svh;
+    }
+
+    .linea {
+        position: relative;
+        list-style: none;
+        width: 106%;
+        margin: 1svh 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2.2svh;
+        text-align: left;
+    }
+
+    /* El hilo vino que une los medallones (pasa por el centro de la columna del medio) */
+    .linea::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        bottom: 18px;
+        left: calc(3.6rem + 10px + 19px);
+        width: 1px;
+        background-image: linear-gradient(rgba(91, 15, 24, 0.15), rgba(91, 15, 24, 0.6), rgba(91, 15, 24, 0.15));
+    }
+
+    .momento {
+        display: grid;
+        grid-template-columns: 3.6rem 38px 1fr;
+        align-items: center;
+        column-gap: 10px;
+    }
+
+    .hora {
+        text-align: right;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-variant-numeric: lining-nums;
+        font-size: clamp(0.88rem, 4vw, 1.02rem);
+        color: var(--rojo);
+    }
+
+    .medallon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background-image: linear-gradient(135deg, #8e1622, #4a0b12);
+        color: #fbe9dc;
+        box-shadow: 0 0 0 3px rgba(251, 244, 236, 0.95), 0 4px 10px rgba(58, 7, 13, 0.25);
+    }
+
+    .medallon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .detalle {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15em;
+    }
+
+    .nombre {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: clamp(0.9rem, 4.1vw, 1.05rem);
+        line-height: 1.25;
+        color: var(--vino-oscuro);
+    }
+
+    .frase {
+        font-family: "Montserrat", system-ui, sans-serif;
+        font-size: clamp(0.76rem, 3.3vw, 0.85rem);
+        line-height: 1.45;
+        color: var(--vino);
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#itinerario ${s}`);
+        entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
+        entrarAlHacerScroll(q(".bajada"), "abajo", { retraso: 0.3 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.4 });
+        document.querySelectorAll("#itinerario .momento").forEach((m, i) =>
+            entrarAlHacerScroll(m, i % 2 === 0 ? "izquierda" : "derecha", { retraso: 0.15 }),
+        );
+    });
+</script>
