@@ -10,7 +10,7 @@ export default defineConfig({
      layout quedan con rutas relativas y WhatsApp no encuentra la imagen:
      la vista previa sale sin miniatura.
   */
-  site: 'https://graduacion-rojo.vercel.app', // PROVISORIA: cambiar por la dirección real al publicar
+  site: 'https://graduacion-micaela-maciel-2026.vercel.app',
   vite: {
     plugins: [tailwindcss()]
   }
