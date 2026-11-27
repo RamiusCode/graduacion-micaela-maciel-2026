@@ -1,0 +1,78 @@
+---
+// src/components/Foto.astro
+// La foto grande de la graduada, debajo de la dedicatoria: recortada en
+// arco, con un filete dorado que la sigue por fuera y una leyenda corta.
+import { graduada } from "../utils/evento";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const foto = { src: "/imagenes/graduada.webp", alt: `${graduada.nombres} con toga y birrete` };
+const leyenda = "Mi gran logro";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="foto" class="hoja">
+    <figure class="marco">
+        <span class="filete-arco" aria-hidden="true"></span>
+        <img src={foto.src} alt={foto.alt} width="760" height="1013" loading="lazy" />
+    </figure>
+    <p class="leyenda">{leyenda}</p>
+    <span class="divisor-vino" aria-hidden="true"></span>
+</section>
+
+<style>
+    .marco {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+        margin: 1svh auto 0;
+        padding: 9px;
+    }
+
+    /* Filete dorado en arco, separado de la foto */
+    .filete-arco {
+        position: absolute;
+        inset: 0;
+        border: 1.5px solid var(--dorado);
+        border-radius: 999px 999px 14px 14px;
+    }
+
+    .marco img {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 3 / 4;
+        object-fit: cover;
+        object-position: 60% 30%;
+        border-radius: 999px 999px 8px 8px;
+        border: 4px solid var(--perla);
+        box-shadow: 0 14px 28px rgba(58, 7, 13, 0.25);
+    }
+
+    .leyenda {
+        margin-top: 2svh;
+        font-family: "Great Vibes", cursive;
+        font-size: clamp(1.9rem, 9vw, 2.4rem);
+        line-height: 1.2;
+        color: var(--vino);
+    }
+
+    .divisor-vino {
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    .divisor-vino::after {
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#foto ${s}`);
+        entrarAlHacerScroll(q(".marco"), "zoom", { retraso: 0.15, duracion: 1.6 });
+        entrarAlHacerScroll(q(".leyenda"), "abajo", { retraso: 0.5 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.7 });
+    });
+</script>

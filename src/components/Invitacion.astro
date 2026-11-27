@@ -5,6 +5,7 @@
 // el listón están fijos en el Layout.
 import Encabezado from "./Encabezado.astro";
 import Dedicatoria from "./Dedicatoria.astro";
+import Foto from "./Foto.astro";
 import Fecha from "./Fecha.astro";
 import Contador from "./Contador.astro";
 import Direccion from "./Direccion.astro";
@@ -27,6 +28,7 @@ const { pases = 0 } = Astro.props;
 <div id="contenido-principal" data-pases={pases}>
     <Encabezado />
     <Dedicatoria />
+    <Foto />
     <Fecha />
     <Contador />
     <Direccion />
