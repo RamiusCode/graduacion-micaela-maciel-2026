@@ -1,12 +1,15 @@
 ---
 // src/components/Vestimenta.astro
-// Código de vestimenta: el título en una sola línea, la ilustración de la
-// pareja de gala, "Formal" en dorado y un pedido sobre los colores.
+// Código de vestimenta: el título en una sola línea, un pedido sobre los
+// colores y dos círculos con los colores a evitar.
 
 // ── DATOS EDITABLES ───────────────────────────────────────────
 const titulo = "Código de vestimenta";
-const codigo = "Formal";
 const nota = "Con cariño, te pido evitar los colores guindo y perla.";
+const colores = [
+    { nombre: "Guindo", color: "#5b0f18" },
+    { nombre: "Perla", color: "#f3e6d8" },
+];
 // ──────────────────────────────────────────────────────────────
 ---
 
@@ -14,10 +17,18 @@ const nota = "Con cariño, te pido evitar los colores guindo y perla.";
     <h2 class="titulo-seccion titulo">{titulo}</h2>
     <span class="divisor-vino" aria-hidden="true"></span>
 
-    <img class="figura" src="/imagenes/codigo.webp" alt="Pareja vestida de gala" width="440" height="753" loading="lazy" />
-
-    <p class="codigo">{codigo}</p>
     <p class="nota">{nota}</p>
+
+    <ul class="colores">
+        {
+            colores.map((c) => (
+                <li>
+                    <span class="circulo" style={`background-image: linear-gradient(${c.color}, ${c.color})`} />
+                    <span class="nombre-color">{c.nombre}</span>
+                </li>
+            ))
+        }
+    </ul>
 </section>
 
 <style>
@@ -27,51 +38,48 @@ const nota = "Con cariño, te pido evitar los colores guindo y perla.";
         white-space: nowrap;
     }
 
-    .figura {
-        display: block;
-        width: 46%;
-        max-width: 170px;
-        height: auto;
-        margin: 1.4svh auto 0;
-        filter: drop-shadow(0 10px 14px rgba(58, 7, 13, 0.2));
-    }
-
-    /* "Formal" en dorado, con una línea fina a cada lado */
-    .codigo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.7em;
-        margin: 2svh 0 0;
-        font-family: "Playfair Display", Georgia, serif;
-        font-weight: 700;
-        font-size: clamp(1.35rem, 6.4vw, 1.7rem);
-        letter-spacing: 0.3em;
-        padding-left: 0.3em;
-        text-transform: uppercase;
-        color: var(--dorado);
-    }
-
-    .codigo::before,
-    .codigo::after {
-        content: "";
-        width: 2.2em;
-        height: 1px;
-        background-image: linear-gradient(var(--dorado), var(--dorado));
-    }
-
-    .codigo::after {
-        margin-left: -0.3em;
-    }
-
     .nota {
-        margin: 1.4svh 0 0;
+        margin: 0.6svh 0 0;
         font-family: "Playfair Display", Georgia, serif;
         font-style: italic;
         font-weight: 500;
         font-size: clamp(0.95rem, 4.3vw, 1.1rem);
         line-height: 1.6;
         color: var(--vino-oscuro);
+    }
+
+    /* Los colores a evitar: círculos con borde dorado */
+    .colores {
+        display: flex;
+        justify-content: center;
+        gap: 8vw;
+        margin: 2svh 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .colores li {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8svh;
+    }
+
+    .circulo {
+        width: clamp(52px, 15vw, 62px);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 2px solid var(--dorado);
+        box-shadow: 0 6px 12px rgba(58, 7, 13, 0.18);
+    }
+
+    .nombre-color {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 600;
+        font-size: clamp(0.8rem, 3.6vw, 0.92rem);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--vino);
     }
 </style>
 
@@ -82,8 +90,7 @@ const nota = "Con cariño, te pido evitar los colores guindo y perla.";
         const q = (s: string) => document.querySelector(`#vestimenta ${s}`);
         entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
         entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.3 });
-        entrarAlHacerScroll(q(".figura"), "zoom", { retraso: 0.45, duracion: 1.6 });
-        entrarAlHacerScroll(q(".codigo"), "abajo", { retraso: 0.7 });
-        entrarAlHacerScroll(q(".nota"), "abajo", { retraso: 0.9 });
+        entrarAlHacerScroll(q(".nota"), "abajo", { retraso: 0.45 });
+        entrarAlHacerScroll(q(".colores"), "zoom", { retraso: 0.7 });
     });
 </script>
