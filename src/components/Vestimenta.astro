@@ -1,0 +1,89 @@
+---
+// src/components/Vestimenta.astro
+// Código de vestimenta: el título en una sola línea, la ilustración de la
+// pareja de gala, "Formal" en dorado y un pedido sobre los colores.
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Código de vestimenta";
+const codigo = "Formal";
+const nota = "Con cariño, te pido evitar los colores guindo y perla.";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="vestimenta" class="hoja">
+    <h2 class="titulo-seccion titulo">{titulo}</h2>
+    <span class="divisor-vino" aria-hidden="true"></span>
+
+    <img class="figura" src="/imagenes/codigo.webp" alt="Pareja vestida de gala" width="440" height="753" loading="lazy" />
+
+    <p class="codigo">{codigo}</p>
+    <p class="nota">{nota}</p>
+</section>
+
+<style>
+    /* Más chico que los otros títulos para que entre en una sola línea */
+    .titulo {
+        font-size: clamp(2rem, 9.2vw, 2.6rem);
+        white-space: nowrap;
+    }
+
+    .figura {
+        display: block;
+        width: 46%;
+        max-width: 170px;
+        height: auto;
+        margin: 1.4svh auto 0;
+        filter: drop-shadow(0 10px 14px rgba(58, 7, 13, 0.2));
+    }
+
+    /* "Formal" en dorado, con una línea fina a cada lado */
+    .codigo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7em;
+        margin: 2svh 0 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: clamp(1.35rem, 6.4vw, 1.7rem);
+        letter-spacing: 0.3em;
+        padding-left: 0.3em;
+        text-transform: uppercase;
+        color: var(--dorado);
+    }
+
+    .codigo::before,
+    .codigo::after {
+        content: "";
+        width: 2.2em;
+        height: 1px;
+        background-image: linear-gradient(var(--dorado), var(--dorado));
+    }
+
+    .codigo::after {
+        margin-left: -0.3em;
+    }
+
+    .nota {
+        margin: 1.4svh 0 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-style: italic;
+        font-weight: 500;
+        font-size: clamp(0.95rem, 4.3vw, 1.1rem);
+        line-height: 1.6;
+        color: var(--vino-oscuro);
+    }
+</style>
+
+<script>
+    import { entrarAlHacerScroll } from "../utils/entradas";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const q = (s: string) => document.querySelector(`#vestimenta ${s}`);
+        entrarAlHacerScroll(q(".titulo-seccion"), "abajo", { retraso: 0.15 });
+        entrarAlHacerScroll(q(".divisor-vino"), "zoom", { retraso: 0.3 });
+        entrarAlHacerScroll(q(".figura"), "zoom", { retraso: 0.45, duracion: 1.6 });
+        entrarAlHacerScroll(q(".codigo"), "abajo", { retraso: 0.7 });
+        entrarAlHacerScroll(q(".nota"), "abajo", { retraso: 0.9 });
+    });
+</script>
